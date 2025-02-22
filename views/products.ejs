@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="/css/products.css">
+    <title>Products</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .carousel-inner img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <header>
+            <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+                <h1 class="navbar-brand"><a href="/">NestMart</a></h1>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item <%= page === 'home' ? 'active' : '' %>"><a class="nav-link" href="/">HOME</a></li>
+                        <li class="nav-item <%= page === 'products' ? 'active' : '' %>"><a class="nav-link" href="/products">Products</a></li>
+                        <li class="nav-item <%= page === 'orders' ? 'active' : '' %>"><a class="nav-link" href="/orders">Your Orders</a></li>
+                        <% if (user && user.isAdmin) { %>
+                            <li class="nav-item <%= page === 'admin' ? 'active' : '' %>"><a class="nav-link" href="/admin">Admin</a></li>
+                        <% } else if (user) { %>
+                            <li class="nav-item <%= page === 'profile' ? 'active' : '' %>"><a class="nav-link" href="/profile">Profile</a></li>
+                        <% } else { %>
+                            <li class="nav-item <%= page === 'login' ? 'active' : '' %>"><a class="nav-link" href="/login">Log in</a></li>
+                        <% } %>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+    </header>
+    <main>
+        <h1>Our Products</h1>
+        <% if (user && user.isAdmin) { %>
+            <button type="button" class="btn btn-success" data-toggle="modal" data-target="#createProductModal">Create New Product</button>
+        <% } %>
+
+        <section class="product-list">
+            <div class="container">
+                <h2>TVs</h2>
+                <div class="row">
+                    <% products.filter(product => product.category === 'TV').forEach(product => { %>
+                        <div class="col-md-4">
+                            <div class="card mb-4">
+                                <div id="carousel<%= product._id %>" class="carousel slide" data-ride="carousel">
+                                    <div class="carousel-inner">
+                                        <% (product.images || []).forEach((image, index) => { %>
+                                            <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                                                <img src="<%= image %>" class="d-block w-100" alt="<%= product.name %>">
+                                            </div>
+                                        <% }) %>
+                                    </div>
+                                    <a class="carousel-control-prev" href="#carousel<%= product._id %>" role="button" data-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="sr-only">Previous</span>
+                                    </a>
+                                    <a class="carousel-control-next" href="#carousel<%= product._id %>" role="button" data-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="sr-only">Next</span>
+                                    </a>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title"><%= product.name %></h5>
+                                    <p class="card-text">
+                                        <%= product.specifications['Screen Size'] || 'No data' %><br>
+                                        <%= product.specifications['Resolution'] || 'No data' %>
+                                    </p>
+                                    <a href="/product/<%= product._id %>" class="btn btn-primary">View Details</a>
+                                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#buyModal<%= product._id %>"></button>
+                                    
+                                    <% if (user && user.isAdmin) { %>
+                                        <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#editProductModal<%= product._id %>">Edit</button>
+                                        <form action="/delete-product/<%= product._id %>" method="post" class="d-inline">
+                                            <input type="hidden" name="category" value="<%= product.category %>">
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </form>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+<!-- Модальное окно для покупки продукта -->
+<div class="modal fade" id="buyModal<%= product._id %>" tabindex="-1" role="dialog" aria-labelledby="buyModalLabel<%= product._id %>" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="buyModalLabel<%= product._id %>"><%= product.name %></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Price: <%= product.price %> KZT</p>
+                <form id="orderForm<%= product._id %>" action="/order" method="post" onsubmit="showSuccessMessage(event, '<%= product._id %>')">
+                    <input type="hidden" name="products[0][productId]" value="<%= product._id %>">
+                    <input type="hidden" name="products[0][quantity]" value="1">
+                    <input type="hidden" name="products[0][category]" value="TV">
+                    <input type="hidden" name="totalPrice[0][price]" value="<%= product.price %>">
+                    <button type="submit" class="btn btn-success">Buy Now</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<% }) %>
+</div>
+    
+                <h2>Mixers</h2>
+                <div class="row">
+                    <% products.filter(product => product.category === 'Mixer').forEach(product => { %>
+                        <div class="col-md-4">
+                            <div class="card mb-4">
+                                <div id="carousel<%= product._id %>" class="carousel slide" data-ride="carousel">
+                                    <div class="carousel-inner">
+                                        <% (product.images || []).forEach((image, index) => { %>
+                                            <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                                                <img src="<%= image %>" class="d-block w-100" alt="<%= product.name %>">
+                                            </div>
+                                        <% }) %>
+                                    </div>
+                                    <a class="carousel-control-prev" href="#carousel<%= product._id %>" role="button" data-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="sr-only">Previous</span>
+                                    </a>
+                                    <a class="carousel-control-next" href="#carousel<%= product._id %>" role="button" data-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="sr-only">Next</span>
+                                    </a>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title"><%= product.name %></h5>
+                                    <p class="card-text">
+                                        <%= product.specifications['Mixer Type'] || 'No data' %><br>
+                                        <%= product.specifications['Mugs'] || 'No data' %>
+                                    </p>
+                                    <a href="/product/<%= product._id %>" class="btn btn-primary">View Details</a>
+                                    <form action="/order" method="post" class="d-inline">
+                                        <input type="hidden" name="productId" value="<%= product._id %>">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="btn btn-success">Buy</button>
+                                    </form>
+                                    <% if (user && user.isAdmin) { %>
+                                        <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#editProductModal<%= product._id %>">Edit</button>
+                                        <form action="/delete-product/<%= product._id %>" method="post" class="d-inline">
+                                            <input type="hidden" name="category" value="<%= product.category %>">
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </form>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <h2>Washing machines</h2>
+                <div class="row">
+                    <% products.filter(product => product.category === 'Washing Machine').forEach(product => { %>
+                        <div class="col-md-4">
+                            <div class="card mb-4">
+                                <div id="carousel<%= product._id %>" class="carousel slide" data-ride="carousel">
+                                    <div class="carousel-inner">
+                                        <% (product.images || []).forEach((image, index) => { %>
+                                            <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                                                <img src="<%= image %>" class="d-block w-100" alt="<%= product.name %>">
+                                            </div>
+                                        <% }) %>
+                                    </div>
+                                    <a class="carousel-control-prev" href="#carousel<%= product._id %>" role="button" data-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="sr-only">Previous</span>
+                                    </a>
+                                    <a class="carousel-control-next" href="#carousel<%= product._id %>" role="button" data-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="sr-only">Next</span>
+                                    </a>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title"><%= product.name %></h5>
+                                    <p class="card-text">
+                                        <%= product.specifications['Dimensions'] || 'No data' %><br>
+                                        <%= product.specifications['Max Load (Washing)'] || 'No data' %>
+                                    </p>
+                                    <a href="/product/<%= product._id %>" class="btn btn-primary">View Details</a>
+                                    <form action="/order" method="post" class="d-inline">
+                                        <input type="hidden" name="productId" value="<%= product._id %>">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="btn btn-success">Buy</button>
+                                    </form>
+                                    <% if (user && user.isAdmin) { %>
+                                        <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#editProductModal<%= product._id %>">Edit</button>
+                                        <form action="/delete-product/<%= product._id %>" method="post" class="d-inline">
+                                            <input type="hidden" name="category" value="<%= product.category %>">
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </form>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+
+                <h2>Fridges</h2>
+                <div class="row">
+                    <% products.filter(product => product.category === 'Fridge').forEach(product => { %>
+                        <div class="col-md-4">
+                            <div class="card mb-4">
+                                <div id="carousel<%= product._id %>" class="carousel slide" data-ride="carousel">
+                                    <div class="carousel-inner">
+                                        <% (product.images || []).forEach((image, index) => { %>
+                                            <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                                                <img src="<%= image %>" class="d-block w-100" alt="<%= product.name %>">
+                                            </div>
+                                        <% }) %>
+                                    </div>
+                                    <a class="carousel-control-prev" href="#carousel<%= product._id %>" role="button" data-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="sr-only">Previous</span>
+                                    </a>
+                                    <a class="carousel-control-next" href="#carousel<%= product._id %>" role="button" data-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="sr-only">Next</span>
+                                    </a>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title"><%= product.name %></h5>
+                                    <p class="card-text">
+                                        <%= product.specifications['Refrigerator Type'] || 'No data' %><br>
+                                        <%= product.specifications['Total Volume'] || 'No data' %>
+                                    </p>
+                                    <a href="/product/<%= product._id %>" class="btn btn-primary">View Details</a>
+                                    <form action="/order" method="post" class="d-inline">
+                                        <input type="hidden" name="productId" value="<%= product._id %>">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="btn btn-success">Buy</button>
+                                    </form>
+                                    <% if (user && user.isAdmin) { %>
+                                        <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#editProductModal<%= product._id %>">Edit</button>
+                                        <form action="/delete-product/<%= product._id %>" method="post" class="d-inline">
+                                            <input type="hidden" name="category" value="<%= product.category %>">
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </form>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                        <% }) %>
+                    </div>
+                
+                <h2>Robot Vacuum Cleaners</h2>
+                <div class="row">
+                    <% products.filter(product => product.category === 'Robot Vacuum Cleaner').forEach(product => { %>
+                        <div class="col-md-4">
+                            <div class="card mb-4">
+                                <div id="carousel<%= product._id %>" class="carousel slide" data-ride="carousel">
+                                    <div class="carousel-inner">
+                                        <% (product.images || []).forEach((image, index) => { %>
+                                            <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                                                <img src="<%= image %>" class="d-block w-100" alt="<%= product.name %>">
+                                            </div>
+                                        <% }) %>
+                                    </div>
+                                    <a class="carousel-control-prev" href="#carousel<%= product._id %>" role="button" data-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="sr-only">Previous</span>
+                                    </a>
+                                    <a class="carousel-control-next" href="#carousel<%= product._id %>" role="button" data-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="sr-only">Next</span>
+                                    </a>
+                                </div>
+                                <div class="card-body">
+                                    <h5 class="card-title"><%= product.name %></h5>
+                                    <p class="card-text">
+                                        <%= product.specifications['Cleaning Type'] || 'No data' %><br>
+                                        <%= product.specifications['Suction Power'] || 'No data' %>
+                                    </p>
+                                    <a href="/product/<%= product._id %>" class="btn btn-primary">View Details</a>
+                                    <form action="/order" method="post" class="d-inline">
+                                        <input type="hidden" name="productId" value="<%= product._id %>">
+                                        <input type="hidden" name="quantity" value="1">
+                                        <button type="submit" class="btn btn-success">Buy</button>
+                                    </form>
+                                    <% if (user && user.isAdmin) { %>
+                                        <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#editProductModal<%= product._id %>">Edit</button>
+                                        <form action="/delete-product/<%= product._id %>" method="post" class="d-inline">
+                                            <input type="hidden" name="category" value="<%= product.category %>">
+                                            <button type="submit" class="btn btn-danger">Delete</button>
+                                        </form>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+                
+                <% products.forEach(product => { %>
+                    <div class="modal fade" id="editProductModal<%= product._id %>" tabindex="-1" role="dialog" aria-labelledby="editProductModalLabel<%= product._id %>" aria-hidden="true" onshow="toggleCategoryFormEdit('<%= product._id %>', '<%= product.category %>')">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="editProductModalLabel<%= product._id %>">Edit Product</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form action="/edit-product/<%= product._id %>" method="post">
+                                        <input type="hidden" name="category" value="<%= product.category %>">
+                
+                                        <% if (product.category === 'TV') { %>
+                                            <div id="tvForm<%= product._id %>">
+                                                <div class="form-group">
+                                                    <label for="name<%= product._id %>">Name</label>
+                                                    <input type="text" class="form-control" id="name<%= product._id %>" name="name" value="<%= product.name %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="url<%= product._id %>">URL</label>
+                                                    <input type="text" class="form-control" id="url<%= product._id %>" name="url" value="<%= product.url %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="images<%= product._id %>">URL images (maximum 3, separated by commas)</label>
+                                                    <input type="text" class="form-control" id="images<%= product._id %>" name="images" value="<%= product.images ? product.images.join(', ') : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="screenSize<%= product._id %>">Screen Size</label>
+                                                    <input type="text" class="form-control" id="screenSize<%= product._id %>" name="Screen Size" value="<%= product.specifications && product.specifications['Screen Size'] ? product.specifications['Screen Size'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="resolution<%= product._id %>">Resolution</label>
+                                                    <input type="text" class="form-control" id="resolution<%= product._id %>" name="Resolution" value="<%= product.specifications && product.specifications['Resolution'] ? product.specifications['Resolution'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="technology<%= product._id %>">Technology</label>
+                                                    <input type="text" class="form-control" id="technology<%= product._id %>" name="Technology" value="<%= product.specifications && product.specifications['Technology'] ? product.specifications['Technology'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="color<%= product._id %>">Color</label>
+                                                    <input type="text" class="form-control" id="color<%= product._id %>" name="Color" value="<%= product.specifications && product.specifications['Color'] ? product.specifications['Color'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="ratio<%= product._id %>">Aspect Ratio</label>
+                                                    <input type="text" class="form-control" id="ratio<%= product._id %>" name="Aspect Ratio" value="<%= product.specifications && product.specifications['Aspect Ratio'] ? product.specifications['Aspect Ratio'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="peculiarities<%= product._id %>">Peculiarities</label>
+                                                    <input type="text" class="form-control" id="peculiarities<%= product._id %>" name="Peculiarities" value="<%= product.specifications && product.specifications['Peculiarities'] ? product.specifications['Peculiarities'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="complete<%= product._id %>">Complete</label>
+                                                    <input type="text" class="form-control" id="complete<%= product._id %>" name="Complete" value="<%= product.specifications && product.specifications['Complete'] ? product.specifications['Complete'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="guarantee<%= product._id %>">Guarantee</label>
+                                                    <input type="text" class="form-control" id="guarantee<%= product._id %>" name="Guarantee" value="<%= product.specifications && product.specifications['Guarantee'] ? product.specifications['Guarantee'] : '' %>">
+                                                </div>
+                                            </div>
+                                        
+                                        <% } else if (product.category === 'Mixer') { %>
+                                            <div id="mixerForm<%= product._id %>">
+                                                <div class="form-group">
+                                                    <label for="name<%= product._id %>">Name</label>
+                                                    <input type="text" class="form-control" id="name<%= product._id %>" name="name" value="<%= product.name %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="url<%= product._id %>">URL</label>
+                                                    <input type="text" class="form-control" id="url<%= product._id %>" name="url" value="<%= product.url %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="images<%= product._id %>">URL images (maximum 3, separated by commas)</label>
+                                                    <input type="text" class="form-control" id="images<%= product._id %>" name="images" value="<%= product.images ? product.images.join(', ') : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="mixerType<%= product._id %>">Mixer Type</label>
+                                                    <input type="text" class="form-control" id="mixerType<%= product._id %>" name="Mixer Type" value="<%= product.specifications && product.specifications['Mixer Type'] ? product.specifications['Mixer Type'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="mugs<%= product._id %>">Mugs</label>
+                                                    <input type="text" class="form-control" id="mugs<%= product._id %>" name="Mugs" value="<%= product.specifications && product.specifications['Mugs'] ? product.specifications['Mugs'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="complete<%= product._id %>">Complete</label>
+                                                    <input type="text" class="form-control" id="complete<%= product._id %>" name="Complete" value="<%= product.specifications && product.specifications['Complete'] ? product.specifications['Complete'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="nozzles<%= product._id %>">The number of nozzles</label>
+                                                    <input type="text" class="form-control" id="nozzles<%= product._id %>" name="The number of nozzles" value="<%= product.specifications && product.specifications['The number of nozzles'] ? product.specifications['The number of nozzles'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="color<%= product._id %>">Color</label>
+                                                    <input type="text" class="form-control" id="color<%= product._id %>" name="Color" value="<%= product.specifications && product.specifications['Color'] ? product.specifications['Color'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="guarantee<%= product._id %>">Guarantee</label>
+                                                    <input type="text" class="form-control" id="guarantee<%= product._id %>" name="Guarantee" value="<%= product.specifications && product.specifications['Guarantee'] ? product.specifications['Guarantee'] : '' %>">
+                                                </div>
+                                            </div>
+
+                                        <% } else if (product.category === 'Washing Machine') { %>
+                                            <div id="washingMachineForm<%= product._id %>">
+                                                <div class="form-group">
+                                                    <label for="name<%= product._id %>">Name</label>
+                                                    <input type="text" class="form-control" id="name<%= product._id %>" name="name" value="<%= product.name %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="url<%= product._id %>">URL</label>
+                                                    <input type="text" class="form-control" id="url<%= product._id %>" name="url" value="<%= product.url %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="images<%= product._id %>">URL images (maximum 3, separated by commas)</label>
+                                                    <input type="text" class="form-control" id="images<%= product._id %>" name="images" value="<%= product.images ? product.images.join(', ') : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="dimensions<%= product._id %>">Dimensions</label>
+                                                    <input type="text" class="form-control" id="dimensions<%= product._id %>" name="Dimensions" value="<%= product.specifications && product.specifications['Dimensions'] ? product.specifications['Dimensions'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="maxLoad<%= product._id %>">Max Load (Washing)</label>
+                                                    <input type="text" class="form-control" id="maxLoad<%= product._id %>" name="Max Load (Washing)" value="<%= product.specifications && product.specifications['Max Load (Washing)'] ? product.specifications['Max Load (Washing)'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="programs<%= product._id %>">Programs</label>
+                                                    <input type="text" class="form-control" id="programs<%= product._id %>" name="Programs" value="<%= product.specifications && product.specifications['Programs'] ? product.specifications['Programs'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="loadType<%= product._id %>">Load Type</label>
+                                                    <input type="text" class="form-control" id="loadType<%= product._id %>" name="Load Type" value="<%= product.specifications && product.specifications['Load Type'] ? product.specifications['Load Type'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="weight<%= product._id %>">Weight</label>
+                                                    <input type="text" class="form-control" id="weight<%= product._id %>" name="Weight" value="<%= product.specifications && product.specifications['Weight'] ? product.specifications['Weight'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="color<%= product._id %>">Color</label>
+                                                    <input type="text" class="form-control" id="color<%= product._id %>" name="Color" value="<%= product.specifications && product.specifications['Color'] ? product.specifications['Color'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="doorColor<%= product._id %>">Door Color</label>
+                                                    <input type="text" class="form-control" id="doorColor<%= product._id %>" name="Door Color" value="<%= product.specifications && product.specifications['Door Color'] ? product.specifications['Door Color'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="guarantee<%= product._id %>">Guarantee</label>
+                                                    <input type="text" class="form-control" id="guarantee<%= product._id %>" name="Guarantee" value="<%= product.specifications && product.specifications['Guarantee'] ? product.specifications['Guarantee'] : '' %>">
+                                                </div>
+                                            </div>
+                                                
+                                        <% } else if (product.category === 'Fridge') { %>
+                                            <div id="fridgeForm<%= product._id %>">
+                                                <div class="form-group">
+                                                    <label for="name<%= product._id %>">Name</label>
+                                                    <input type="text" class="form-control" id="name<%= product._id %>" name="name" value="<%= product.name %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="url<%= product._id %>">URL</label>
+                                                    <input type="text" class="form-control" id="url<%= product._id %>" name="url" value="<%= product.url %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="images<%= product._id %>">URL images (maximum 3, separated by commas)</label>
+                                                    <input type="text" class="form-control" id="images<%= product._id %>" name="images" value="<%= product.images ? product.images.join(', ') : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="refrigeratorType<%= product._id %>">Refrigerator Type</label>
+                                                    <input type="text" class="form-control" id="refrigeratorType<%= product._id %>" name="Refrigerator Type" value="<%= product.specifications && product.specifications['Refrigerator Type'] ? product.specifications['Refrigerator Type'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="totalVolume<%= product._id %>">Total Volume</label>
+                                                    <input type="text" class="form-control" id="totalVolume<%= product._id %>" name="Total Volume" value="<%= product.specifications && product.specifications['Total Volume'] ? product.specifications['Total Volume'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="compressorType<%= product._id %>">Compressor Type</label>
+                                                    <input type="text" class="form-control" id="compressorType<%= product._id %>" name="Compressor Type" value="<%= product.specifications && product.specifications['Compressor Type'] ? product.specifications['Compressor Type'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="color<%= product._id %>">Color</label>
+                                                    <input type="text" class="form-control" id="color<%= product._id %>" name="Color" value="<%= product.specifications && product.specifications['Color'] ? product.specifications['Color'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="weight<%= product._id %>">Weight</label>
+                                                    <input type="text" class="form-control" id="weight<%= product._id %>" name="Weight" value="<%= product.specifications && product.specifications['Weight'] ? product.specifications['Weight'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="peculiarities<%= product._id %>">Peculiarities</label>
+                                                    <input type="text" class="form-control" id="peculiarities<%= product._id %>" name="Peculiarities" value="<%= product.specifications && product.specifications['Peculiarities'] ? product.specifications['Peculiarities'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="complete<%= product._id %>">Complete</label>
+                                                    <input type="text" class="form-control" id="complete<%= product._id %>" name="Complete" value="<%= product.specifications && product.specifications['Complete'] ? product.specifications['Complete'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="guarantee<%= product._id %>">Guarantee</label>
+                                                    <input type="text" class="form-control" id="guarantee<%= product._id %>" name="Guarantee" value="<%= product.specifications && product.specifications['Guarantee'] ? product.specifications['Guarantee'] : '' %>">
+                                                </div>
+                                            </div>
+                                                
+                                        <% } else if (product.category === 'Robot Vacuum Cleaner') { %>
+                                            <div id="robotVacuumCleanerForm<%= product._id %>">
+                                                <div class="form-group">
+                                                    <label for="name<%= product._id %>">Name</label>
+                                                    <input type="text" class="form-control" id="name<%= product._id %>" name="name" value="<%= product.name %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="url<%= product._id %>">URL</label>
+                                                    <input type="text" class="form-control" id="url<%= product._id %>" name="url" value="<%= product.url %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="images<%= product._id %>">URL images (maximum 3, separated by commas)</label>
+                                                    <input type="text" class="form-control" id="images<%= product._id %>" name="images" value="<%= product.images ? product.images.join(', ') : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="cleaningType<%= product._id %>">Cleaning Type</label>
+                                                    <input type="text" class="form-control" id="cleaningType<%= product._id %>" name="Cleaning Type" value="<%= product.specifications && product.specifications['Cleaning Type'] ? product.specifications['Cleaning Type'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="suctionPower<%= product._id %>">Suction Power</label>
+                                                    <input type="text" class="form-control" id="suctionPower<%= product._id %>" name="Suction Power" value="<%= product.specifications && product.specifications['Suction Power'] ? product.specifications['Suction Power'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="cleaningZoneLimiter<%= product._id %>">Cleaning Zone Limiter</label>
+                                                    <input type="text" class="form-control" id="cleaningZoneLimiter<%= product._id %>" name="Cleaning Zone Limiter" value="<%= product.specifications && product.specifications['Cleaning Zone Limiter'] ? product.specifications['Cleaning Zone Limiter'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="complete<%= product._id %>">Complete</label>
+                                                    <input type="text" class="form-control" id="complete<%= product._id %>" name="Complete" value="<%= product.specifications && product.specifications['Complete'] ? product.specifications['Complete'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="weight<%= product._id %>">Weight</label>
+                                                    <input type="text" class="form-control" id="weight<%= product._id %>" name="Weight" value="<%= product.specifications && product.specifications['Weight'] ? product.specifications['Weight'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="color<%= product._id %>">Color</label>
+                                                    <input type="text" class="form-control" id="color<%= product._id %>" name="Color" value="<%= product.specifications && product.specifications['Color'] ? product.specifications['Color'] : '' %>">
+                                                </div>
+                                                <div class="form-group">
+                                                    <label for="guarantee<%= product._id %>">Guarantee</label>
+                                                    <input type="text" class="form-control" id="guarantee<%= product._id %>" name="Guarantee" value="<%= product.specifications && product.specifications['Guarantee'] ? product.specifications['Guarantee'] : '' %>">
+                                                </div>
+                                            </div>
+                                        <% } %>
+                                        <button type="submit" class="btn btn-primary">Update</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            </div>
+            <% if (user && user.isAdmin) { %>
+            <div class="modal fade" id="createProductModal" tabindex="-1" role="dialog" aria-labelledby="createProductModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="createProductModalLabel">Create New Product</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form action="/create-product" method="post">
+                                <div class="form-group">
+                                    <label for="category">Category</label>
+                                    <select class="form-control" id="category" name="category" onchange="toggleCategoryForm(this.value)">
+                                        <option value="">Select Category</option>
+                                        <option value="TV">TV</option>
+                                        <option value="Mixer">Mixer</option>
+                                        <option value="Washing Machine">Washing Mashine</option>
+                                        <option value="Fridge">Fridge</option>
+                                        <option value="Robot Vacuum Cleaner">Robot Vacuum Cleaner</option>
+                                    </select>
+                                </div>
+                                <div id="tvForm" style="display: none;">
+                                    <div class="form-group">
+                                        <label for="name">Name</label>
+                                        <input type="text" class="form-control" id="name" name="name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="url">URL</label>
+                                        <input type="text" class="form-control" id="url" name="url">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="images">URL images (maximum 3, separated by commas)</label>
+                                        <input type="text" class="form-control" id="images" name="images">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="screenSize">Screen Size</label>
+                                        <input type="text" class="form-control" id="screenSize" name="Screen Size">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="resolution">Resolution</label>
+                                        <input type="text" class="form-control" id="resolution" name="Resolution">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="technology">Technology</label>
+                                        <input type="text" class="form-control" id="technology" name="Technology">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="color">Color</label>
+                                        <input type="text" class="form-control" id="color" name="Color">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ratio">Aspect Ratio</label>
+                                        <input type="text" class="form-control" id="ratio" name="Aspect Ratio">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="peculiarities">Peculiarities</label>
+                                        <input type="text" class="form-control" id="peculiarities" name="Peculiarities">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="complete">Complete</label>
+                                        <input type="text" class="form-control" id="complete" name="Complete">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="guarantee">Guarantee</label>
+                                        <input type="text" class="form-control" id="guarantee" name="Guarantee">
+                                    </div>
+                                </div>
+
+                                <div id="mixerForm" style="display: none;">
+                                    <div class="form-group">
+                                        <label for="name">Name</label>
+                                        <input type="text" class="form-control" id="name" name="name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="url">URL</label>
+                                        <input type="text" class="form-control" id="url" name="url">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="images">URL images (maximum 3, separated by commas)</label>
+                                        <input type="text" class="form-control" id="images" name="images">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="mixerType">Mixer Type</label>
+                                        <input type="text" class="form-control" id="mixerType" name="Mixer Type">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="mugs">Mugs</label>
+                                        <input type="text" class="form-control" id="mugs" name="Mugs">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="complete">Complete</label>
+                                        <input type="text" class="form-control" id="complete" name="Complete">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="nozzles">The number of nozzles</label>
+                                        <input type="text" class="form-control" id="nozzles" name="The number of nozzles">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="color">Color</label>
+                                        <input type="text" class="form-control" id="color" name="Color">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="guarantee">Guarantee</label>
+                                        <input type="text" class="form-control" id="guarantee" name="Guarantee">
+                                    </div>
+                                </div>
+
+                                <div id="washingMachineForm" style="display: none;">
+                                    <div class="form-group">
+                                        <label for="name">Name</label>
+                                        <input type="text" class="form-control" id="name" name="name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="url">URL</label>
+                                        <input type="text" class="form-control" id="url" name="url">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="images">URL images (maximum 3, separated by commas)</label>
+                                        <input type="text" class="form-control" id="images" name="images">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="dimensions">Dimensions</label>
+                                        <input type="text" class="form-control" id="dimensions" name="Dimensions">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="maxLoad">Max Load (Washing)</label>
+                                        <input type="text" class="form-control" id="maxLoad" name="Max Load">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="programs">Programs</label>
+                                        <input type="text" class="form-control" id="programs" name="Programs">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="loadType">Load Type</label>
+                                        <input type="text" class="form-control" id="loadType" name="Load Type">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="weight">Weight</label>
+                                        <input type="text" class="form-control" id="weight" name="Weight">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="color">Color</label>
+                                        <input type="text" class="form-control" id="color" name="Color">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="doorColor">Door Color</label>
+                                        <input type="text" class="form-control" id="doorColor" name="Door Color">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="guarantee">Guarantee</label>
+                                        <input type="text" class="form-control" id="guarantee" name="Guarantee">
+                                    </div>
+                                </div>
+
+                                <div id="fridgeForm" style="display: none;">
+                                    <div class="form-group">
+                                        <label for="name">Name</label>
+                                        <input type="text" class="form-control" id="name" name="name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="url">URL</label>
+                                        <input type="text" class="form-control" id="url" name="url">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="images">URL images (maximum 3, separated by commas)</label>
+                                        <input type="text" class="form-control" id="images" name="images">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="refrigeratorType">Refrigerator Type</label>
+                                        <input type="text" class="form-control" id="refrigeratorType" name="Refrigerator Type">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="totalVolume">Total Volume</label>
+                                        <input type="text" class="form-control" id="totalVolume" name="Total Volume">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="compressorType">Compressor Type</label>
+                                        <input type="text" class="form-control" id="compressorType" name="Compressor Type">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="color">Color</label>
+                                        <input type="text" class="form-control" id="color" name="Color">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="weight">Weight</label>
+                                        <input type="text" class="form-control" id="weight" name="Weight">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="complete">Complete</label>
+                                        <input type="text" class="form-control" id="complete" name="Complete">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="guarantee">Guarantee</label>
+                                        <input type="text" class="form-control" id="guarantee" name="Guarantee">
+                                    </div>
+                                </div>
+
+                                <div id="robotVacuumCleanerForm" style="display: none;">
+                                    <div class="form-group">
+                                        <label for="name">Name</label>
+                                        <input type="text" class="form-control" id="name" name="name">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="url">URL</label>
+                                        <input type="text" class="form-control" id="url" name="url">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="images">URL images (maximum 3, separated by commas)</label>
+                                        <input type="text" class="form-control" id="images" name="images">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="cleaningType">Cleaning Type</label>
+                                        <input type="text" class="form-control" id="cleaningType" name="Cleaning Type">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="suctionPower">Suction Power</label>
+                                        <input type="text" class="form-control" id="suctionPower" name="Suction Power">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="cleaningZoneLimiter">Cleaning Zone Limiter</label>
+                                        <input type="text" class="form-control" id="cleaningZoneLimiter" name="Cleaning Zone Limiter">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="complete">Complete</label>
+                                        <input type="text" class="form-control" id="complete" name="Complete">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="weight">Weight</label>
+                                        <input type="text" class="form-control" id="weight" name="Weight">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="color">Color</label>
+                                        <input type="text" class="form-control" id="color" name="Color">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="guarantee">Guarantee</label>
+                                        <input type="text" class="form-control" id="guarantee" name="Guarantee">
+                                    </div>
+                                </div>
+                                    <button type="submit" class="btn btn-primary">Create</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <% } %>
+        </section>
+    </main>
+    <footer>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <p style="text-align: center;">&copy; Ali Ainur, Akerke Kassymbekova IT-2308</p>
+        <script>
+            function toggleCategoryForm(category) {
+                document.getElementById('tvForm').style.display = (category === 'TV') ? 'block' : 'none';
+                document.getElementById('mixerForm').style.display = (category === 'Mixer') ? 'block' : 'none';
+                document.getElementById('washingMachineForm').style.display = (category === 'Washing Machine') ? 'block' : 'none';
+                document.getElementById('fridgeForm').style.display = (category === 'Fridge') ? 'block' : 'none';
+                document.getElementById('robotVacuumCleanerForm').style.display = (category === 'Robot Vacuum Cleaner') ? 'block' : 'none';
+            }
+
+            document.addEventListener('DOMContentLoaded', function() {
+                toggleCategoryForm(document.getElementById('category').value);
+            });
+        </script>
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+    const forms = document.querySelectorAll('form');
+
+    forms.forEach(form => {
+        form.addEventListener('submit', (event) => {
+            event.preventDefault(); 
+            
+            const formData = new FormData(form);
+            const data = {};
+
+            formData.forEach((value, key) => {
+                if (!data[key]) {
+                    data[key] = value;
+                } else {
+                    if (!Array.isArray(data[key])) {
+                        data[key] = [data[key]];
+                    }
+                    data[key].push(value);
+                }
+            });
+
+            console.log('Отправляем данные:', data);
+
+            fetch(form.action, {
+                method: form.method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                console.log('Ответ от сервера получен');
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(result => {
+                console.log('Результат:', result);
+                if (result.success) {
+                    window.location.href = '/orders'; 
+                } else {
+                    alert('Error placing order. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    });
+});
+
+$(document).ready(function() {
+    $('form[id^="buyForm"]').on('submit', function(event) {
+        event.preventDefault();
+        var $form = $(this);
+        $.post($form.attr('action'), $form.serialize(), function(data) {
+            window.location.href = '/orders'; // Перенаправление на страницу заказов
+        }).fail(function() {
+            alert('Error placing order. Please try again.');
+        });
+    });
+});
+
+        </script>
+        <script>
+function showSuccessMessage(event, productId) {
+    event.preventDefault();
+    alert("Well done! The purchase has been successfully completed.");
+    document.getElementById('orderForm' + productId).submit();
+}
+</script>
+    </footer>
+</body>
+</html>

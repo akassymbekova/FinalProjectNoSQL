@@ -1,0 +1,130 @@
+body {
+    font-family: Arial, sans-serif;
+    background: hwb(0 100% 0%);
+    padding-top: 70px;
+}
+
+header {
+    margin-bottom: 40px;
+}
+
+nav {
+    display: flex;
+    padding: 2% 6%;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.navbar-brand a {
+    text-decoration: none;
+    color: black;
+}
+
+.navbar-nav .nav-item .nav-link {
+    font-size: 1.2rem;
+    color: #333;
+    padding: 8px 12px;
+    transition: color 0.3s ease;
+}
+
+h1 a {
+    font-size: 2rem;
+    color: black;
+    font-weight: bold;
+}
+
+/* Main content */
+.container {
+    margin-top: 100px;
+    padding: 30px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Title and headings */
+h1 {
+    font-size: 2.5rem;
+    color: #007bff;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+
+form input, form select, form button {
+    width: 100%;
+    padding: 12px 20px;
+    margin: 10px 0;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+    background-color: #f8f9fa;
+}
+
+form input[type="text"], form input[type="email"], form input[type="number"], form input[type="password"] {
+    max-width: 400px;
+    margin: 10px auto;
+}
+
+form input:focus, form select:focus, form button:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+button[type="submit"] {
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+#editButton {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+#editButton:hover {
+    background-color: #218838;
+}
+
+#editForm {
+    display: none;
+    margin-top: 30px;
+}
+footer {
+    background-color: #474747;
+    color: #ffffff;
+    padding: 20px;
+    text-align: center;
+    border-top: 3px solid #ffffff;
+    box-shadow: 0 -4px 8px rgba(0,0,0,0.1);
+}
+
+footer p {
+    margin: 10px 0;
+    font-size: 16px;
+    color: #ffffff;
+}
+
+footer a {
+    color: #ffffff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+footer a:hover {
+    color: #ffebee;
+}

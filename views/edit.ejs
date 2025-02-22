@@ -1,0 +1,19 @@
+<form action="/update/<%= product.id %>" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="title">Title:</label>
+        <input type="text" class="form-control" id="title" name="title" value="<%= product.title %>">
+    </div>
+    <div class="form-group">
+        <label for="category">Category:</label>
+        <input type="text" class="form-control" id="category" name="category" value="<%= product.category %>">
+    </div>
+    <div class="form-group">
+        <label for="description">Description:</label>
+        <textarea class="form-control" id="description" name="description"><%= product.description %></textarea>
+    </div>
+    <div class="form-group">
+        <label for="images">Images:</label>
+        <input type="file" class="form-control" id="images" name="images" multiple>
+    </div>
+    <button type="submit" class="btn btn-primary">Update</button>
+</form>

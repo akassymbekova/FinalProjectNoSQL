@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="/css/product.css">
+    <title><%= product.name %></title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        .carousel-inner img {
+            width: 100%;
+            height: auto;
+            max-height: 500px;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <header>
+            <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+                <h1 class="navbar-brand"><a href="/">NestMart</a></h1>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item <%= page === 'home' ? 'active' : '' %>"><a class="nav-link" href="/">HOME</a></li>
+                        <li class="nav-item <%= page === 'products' ? 'active' : '' %>"><a class="nav-link" href="/products">Products</a></li>
+                        <li class="nav-item <%= page === 'orders' ? 'active' : '' %>"><a class="nav-link" href="/orders">Your Orders</a></li>
+                        <% if (user && user.isAdmin) { %>
+                            <li class="nav-item <%= page === 'admin' ? 'active' : '' %>"><a class="nav-link" href="/admin">Admin</a></li>
+                        <% } else if (user) { %>
+                            <li class="nav-item <%= page === 'profile' ? 'active' : '' %>"><a class="nav-link" href="/profile">Profile</a></li>
+                        <% } else { %>
+                            <li class="nav-item <%= page === 'login' ? 'active' : '' %>"><a class="nav-link" href="/login">Log in</a></li>
+                        <% } %>
+                    </ul>
+                </div>
+            </nav>
+        </header>
+    </header>
+    <main>
+        <h1><%= product.name %></h1>
+        <section class="product-detail container">
+            <div id="carousel<%= product._id %>" class="carousel slide" data-ride="carousel">
+                <div class="carousel-inner">
+                    <% (product.images || []).forEach((image, index) => { %>
+                        <div class="carousel-item <%= index === 0 ? 'active' : '' %>">
+                            <img src="<%= image %>" class="d-block w-100" alt="<%= product.name %>">
+                        </div>
+                    <% }) %>
+                </div>
+                <a class="carousel-control-prev" href="#carousel<%= product._id %>" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                </a>
+                <a class="carousel-control-next" href="#carousel<%= product._id %>" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                </a>
+            </div>
+            <ul class="specifications mt-4">
+                <% if (product.category === 'TV') { %>
+                    <li><strong>Screen Size:</strong> <%= product.specifications['Screen Size'] %></li>
+                    <li><strong>Resolution:</strong> <%= product.specifications['Resolution'] %></li>
+                    <li><strong>Technology:</strong> <%= product.specifications['Technology'] %></li>
+                    <li><strong>Color:</strong> <%= product.specifications['Color'] %></li>
+                    <li><strong>Aspect Ratio:</strong> <%= product.specifications['Aspect Ratio'] %></li>
+                    <li><strong>Peculiarities:</strong> <%= product.specifications['Peculiarities'] %></li>
+                    <li><strong>Complete:</strong> <%= product.specifications['Complete'] %></li>
+                    <li><strong>Guarantee:</strong> <%= product.specifications['Guarantee'] %></li>
+                <% } else if (product.category === 'Mixer') { %>
+                    <li><strong>Mixer Type:</strong> <%= product.specifications['Mixer Type'] %></li>
+                    <li><strong>Mugs:</strong> <%= product.specifications['Mugs'] %></li>
+                    <li><strong>Complete:</strong> <%= product.specifications['Complete'] %></li>
+                    <li><strong>The number of nozzles:</strong> <%= product.specifications['The number of nozzles'] %></li>
+                    <li><strong>Color:</strong> <%= product.specifications['Color'] %></li>
+                    <li><strong>Guarantee:</strong> <%= product.specifications['Guarantee'] %></li>
+                    <% } else if (product.category === 'Washing Machine') { %>
+                        <li><strong>Dimensions:</strong> <%= product.specifications['Dimensions'] %></li>
+                        <li><strong>Max Load (Washing):</strong> <%= product.specifications['Max Load (Washing)'] %></li>
+                        <li><strong>Programs:</strong> <%= product.specifications['Programs'] %></li>
+                        <li><strong>Load Type:</strong> <%= product.specifications['Load Type'] %></li>
+                        <li><strong>Weight:</strong> <%= product.specifications['Weight'] %></li>
+                        <li><strong>Color:</strong> <%= product.specifications['Color'] %></li>
+                        <li><strong>Door Color:</strong> <%= product.specifications['Door Color'] %></li>
+                        <li><strong>Guarantee:</strong> <%= product.specifications['Guarantee'] %></li>
+                    <% } else if (product.category === 'Fridge') { %>
+                        <li><strong>Refrigerator Type:</strong> <%= product.specifications['Refrigerator Type'] %></li>
+                        <li><strong>Total Volume:</strong> <%= product.specifications['Total Volume'] %></li>
+                        <li><strong>Compressor Type:</strong> <%= product.specifications['Compressor Type'] %></li>
+                        <li><strong>Color:</strong> <%= product.specifications['Color'] %></li>
+                        <li><strong>Weight:</strong> <%= product.specifications['Weight'] %></li>
+                        <li><strong>Peculiarities:</strong> <%= product.specifications['Peculiarities'] %></li>
+                        <li><strong>Complete:</strong> <%= product.specifications['Complete'] %></li>
+                        <li><strong>Guarantee:</strong> <%= product.specifications['Guarantee'] %></li>
+                    <% } else if (product.category === 'Robot Vacuum Cleaner') { %>
+                        <li><strong>Cleaning Type:</strong> <%= product.specifications['Cleaning Type'] %></li>
+                        <li><strong>Suction Power:</strong> <%= product.specifications['Suction Power'] %></li>
+                        <li><strong>Cleaning Zone Limiter:</strong> <%= product.specifications['Cleaning Zone Limiter'] %></li>
+                        <li><strong>Complete:</strong> <%= product.specifications['Complete'] %></li>
+                        <li><strong>Weight:</strong> <%= product.specifications['Weight'] %></li>
+                        <li><strong>Color:</strong> <%= product.specifications['Color'] %></li>
+                        <li><strong>Guarantee:</strong> <%= product.specifications['Guarantee'] %></li>
+                        
+                            
+                        <% } %>
+            </ul>
+            <% if (user && user.isAdmin) { %>
+                <form action="/update-product/<%= product._id %>" method="post" class="mt-3">
+                    <div class="form-group">
+                        <label for="images<%= product._id %>">URL images (maximum 3, separated by commas):</label>
+                        <input type="text" class="form-control" id="images<%= product._id %>" name="images" value="<%= product.images ? product.images.join(', ') : '' %>">
+                    </div>
+                    <input type="hidden" name="category" value="<%= product.category %>">
+                    <button type="submit" class="btn btn-primary">Update</button>
+                </form>
+            <% } %>
+        </section>
+    </main>
+    <footer>
+        <p>&copy; <%= new Date().getFullYear() %> NestMart</p>
+    </footer>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

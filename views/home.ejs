@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+        <link rel="stylesheet" href="/css/home.css">
+        <title>NestMart - Home Suppliers</title>
+    </head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+            <h1 class="navbar-brand"><a href="/">NestMart</a></h1>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item <%= page === 'home' ? 'active' : '' %>"><a class="nav-link" href="/">HOME</a></li>
+                    <li class="nav-item <%= page === 'products' ? 'active' : '' %>"><a class="nav-link" href="/products">Products</a></li>
+                    <li class="nav-item <%= page === 'orders' ? 'active' : '' %>"><a class="nav-link" href="/orders">Your Orders</a></li>
+                    <% if (user && user.isAdmin) { %>
+                        <li class="nav-item <%= page === 'admin' ? 'active' : '' %>"><a class="nav-link" href="/admin">Admin</a></li>
+                    <% } else if (user) { %>
+                        <li class="nav-item <%= page === 'profile' ? 'active' : '' %>"><a class="nav-link" href="/profile">Profile</a></li>
+                    <% } else { %>
+                        <li class="nav-item <%= page === 'login' ? 'active' : '' %>"><a class="nav-link" href="/login">Log in</a></li>
+                    <% } %>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    <main>
+        <section class="hero">
+            <div id="carouselExampleCaptions" class="carousel slide" data-ride="carousel">
+                <ol class="carousel-indicators">
+                    <li data-target="#carouselExampleCaptions" data-slide-to="0" class="active"></li>
+                    <li data-target="#carouselExampleCaptions" data-slide-to="1"></li>
+                    <li data-target="#carouselExampleCaptions" data-slide-to="2"></li>
+                </ol>
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                    <img src="/img/hom1.jpg" class="d-block w-100" alt="...">
+                    <div class="carousel-caption d-none d-md-block">
+                        <h5>Find Everything for Your Home</h5>
+                        <p>Explore our top-quality home supplies. Reliable, affordable, and delivered to your doorstep.</p>
+                    </div>
+                    </div>
+                    <div class="carousel-item">
+                    <img src="/img/hom2.jpg" class="d-block w-100" alt="...">
+                    <div class="carousel-caption d-none d-md-block">
+                        <h5>Expert Tips for Your Home</h5>
+                        <p>Discover guides and tutorials on choosing the best home supplies. Tips from industry experts.</p>
+                    </div>
+                    </div>
+                    <div class="carousel-item">
+                    <img src="/img/hom3.jpg" class="d-block w-100" alt="...">
+                    <div class="carousel-caption d-none d-md-block">
+                        <h5>Exclusive Deals on Home Essentials</h5>
+                        <p>Don't miss out on discounts and promotions on top-quality home supplies. Comfort and quality at the best prices.</p>
+                    </div>
+                    </div>
+                </div>
+                <a class="carousel-control-prev" href="#carouselExampleCaptions" role="button" data-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Previous</span>
+                </a>
+                <a class="carousel-control-next" href="#carouselExampleCaptions" role="button" data-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="sr-only">Next</span>
+                </a>
+            </div>
+            <section class="welcome my-5">
+                <h2>Welcome to NestMart</h2>
+                <p><strong id="greeting"></strong><strong> Welcome to NestMart — your one-stop shop for quality home supplies and essentials.</strong>
+                    At NestMart, we believe that a well-equipped home creates a comfortable and efficient lifestyle. We are here to provide you with a wide range of top-quality home products, from everyday necessities to unique finds that enhance your living space. Our mission goes beyond just selling products — we offer practical solutions to make your home more functional and stylish.  
+                    Our carefully curated selection includes high-quality home essentials, kitchenware, cleaning supplies, and more, sourced from trusted brands and innovative suppliers. Each item is chosen to bring convenience, durability, and value to your home.  
+                    In addition to our products, we provide expert tips and guides to help you make informed choices and maintain a well-organized home. Whether you need storage solutions, home improvement ideas, or eco-friendly alternatives, NestMart is here to assist you every step of the way.  
+                </p>
+            
+                <dl>
+                    <p>At NestMart, we are committed to making home shopping simple, affordable, and enjoyable. Discover everything you need for a cozy and well-equipped home — all in one place.</p>
+                </dl>
+            </section>
+
+            <section id="weather" class="my-5">
+                <h2>Current Weather in Astana</h2>
+                <p>Temperature: <span id="temperature"></span> °C</p>
+                <p>Description: <span id="description"></span></p>
+                <p>Icon: <img id="icon" class="weather-icon" src="" alt="Weather icon"></p>
+                <p>Coordinates: <span id="coordinates"></span></p>
+                <p>Feels Like: <span id="feels-like"></span> °C</p>
+                <p>Humidity: <span id="humidity"></span> %</p>
+                <p>Pressure: <span id="pressure"></span> hPa</p>
+                <p>Wind Speed: <span id="wind-speed"></span> m/s</p>
+                <p>Country Code: <span id="country-code"></span></p>
+                <p>Rain Volume (last 3 hours): <span id="rain-volume"></span> mm</p>
+            </section>
+            
+            <section class="motivational my-5 text-center">
+                <h2>Transform Your Home, Transform Your Life</h2>
+                <p>"A home is not a place, it's a feeling." - Charles Dickens</p>
+                <p>At NestMart, we believe that a well-equipped home brings comfort, peace, and joy. Our curated selection of quality home supplies and essentials is designed to help you create a space that reflects your unique style and enhances your daily life.</p>
+            </section>
+            
+            <section id="map" class="my-5" style="height: 500px;">
+                <h2>Map Location</h2>
+                <div id="mapid" style="height: 100%;"></div>
+            </section>
+            
+            <section class="products my-5">
+                <h2>Our Top Products</h2>
+                <div class="row">
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <img src="/img/fridge.jpg" class="card-img-top" alt="Product 1">
+                            <div class="card-body">
+                                <h5 class="card-title">The Samsung Fridge RB31FERNDSA</h5>
+                                <p class="card-text">The Samsung RB31FERNDSA offers a spacious 339L capacity with a No Frost system to keep your food fresh without the hassle of manual defrosting. Equipped with an energy-efficient design, it includes a Multi-Airflow cooling system for even temperature distribution and quieter operation at 37 dB. Perfect for any modern kitchen.</p>
+                                <p><strong>$499.99</strong></p>
+                                <a href="/product-detail/2" class="btn btn-primary">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <img src="/img/vac.jpg" class="card-img-top" alt="Robot Vacuum Tefal RG7447WH Explorer Serie 60 White">
+                            <div class="card-body">
+                                <h5 class="card-title">Robot Vacuum Tefal RG7447WH Explorer Serie 60 White</h5>
+                                <p class="card-text">The Tefal RG7447WH Explorer Serie 60 is a sleek, powerful robot vacuum designed for efficient cleaning with advanced navigation. It features multiple cleaning modes, including spot cleaning and edge cleaning, with a long-lasting battery for extended cleaning sessions.</p>
+                                <p><strong>$499.99</strong></p>
+                                <a href="/product-detail/2" class="btn btn-primary">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <img src="/img/hai.jpg" class="card-img-top" alt="Haier Washing Machine HW60-BP12919B">
+                            <div class="card-body">
+                                <h5 class="card-title">Haier Washing Machine HW60-BP12919B</h5>
+                                <p class="card-text">The Haier HW60-BP12919B is a compact 6kg front-loading washing machine with a 1000 RPM spin speed for efficient cleaning and water extraction. It offers a range of wash programs, ensuring that your laundry needs are met, while maintaining energy efficiency and quiet operation at 72 dB.</p>
+                                <p><strong>$299.99</strong></p>
+                                <a href="/product-detail/3" class="btn btn-primary">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>
+    </main>
+    <footer>
+
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+        <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+        <script src="/js/home.js"></script>
+        <p style="text-align: center;">&copy; Ali Ainur, Akerke Kassymbekova IT-2308</p>
+        <script>
+            function clearProduct(id) {
+                fetch(`/clear-product/${id}`, {
+                    method: 'POST'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        location.reload();
+                    } else {
+                        console.error('Error clearing product');
+                    }
+                });
+            }
+        </script>
+    </footer>
+</body>
+</html>
