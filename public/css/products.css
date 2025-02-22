@@ -132,7 +132,7 @@ h1 {
 
 /* Modal */
 .modal-content {
-    border-radius: 8px;
+    padding: 20px;
 }
 
 .modal-header {
@@ -149,8 +149,16 @@ h1 {
 
 /* Button styles */
 .btn-success {
+    font-size: 16px;
+    padding: 10px 20px;
     background-color: #28a745;
-    border-color: #28a745;
+    border: none;
+    color: white;
+    text-align: center;
+    display: inline-block;
+    margin: 5px;
+    cursor: pointer;
+    border-radius: 5px;
 }
 
 .btn-success:hover {
