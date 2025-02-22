@@ -22,6 +22,7 @@ Ainur - Integrated main backend servers and presentation
 
 
 ## APIs Used
+
 - **OpenWeatherAPI**: Provides real-time weather data including temperature, humidity, wind speed, weather description, rain volume (last 3 hours), and more. This data is displayed on the frontend for users to check the weather conditions of any given city.
 - **Map API (e.g., Google Maps API)**: Displays the location of cities based on their latitude and longitude. This API is used to visually showcase the location of a city on a map, enhancing the user's understanding of the weather conditions by showing the exact geographic location.
 
@@ -82,3 +83,34 @@ How It Works
 The application uses the latitude and longitude obtained from the weather data to display the location of the city on a map.
 This helps users visualize the geographic location and context of the weather data.
 
+## Database Structure
+
+## Collections:
+- Products: Stores information about home appliances, including name, price, stock, and description.
+- Users: Stores customer information such as name, email, password, and role (e.g., customer or admin).
+- Admin: Stores information related to the administrators who manage the product catalog and order processing.
+- Orders: Stores user orders, including product details, quantity, and order status (e.g., pending, completed).
+
+## Product Management Operations
+
+The application provides CRUD (Create, Read, Update, Delete) operations for managing home appliance products. These operations interact with the database to handle products of various categories (TV, Mixer, Washing Machine, Fridge, Robot Vacuum Cleaner).
+
+- Create Product (/create-product)
+
+Method: POST
+Description: Allows administrators to create a new product and save it to the database. The request includes product details such as name, URL, category, images, and specifications. Based on the selected category (e.g., TV, Mixer), the product is saved to the respective collection (e.g., TV, Mixer).
+
+- Update Product (/update-product/:id)
+
+Method: POST
+Description: Updates an existing product based on the product ID. This route allows the administrator to modify the images of a product. The images are passed as a comma-separated string, which is split into an array before saving.
+
+- Edit Product (/edit-product/:id)
+
+Method: POST
+Description: Allows administrators to edit an existing product's details. The product's category (e.g., TV, Mixer) is used to select the correct collection. The details such as name, URL, images, and specifications can be updated.
+
+- Delete Product (/delete-product/:id)
+
+Method: POST
+Description: Deletes a product based on its product ID. The route requires the category (e.g., TV, Mixer) to determine which collection the product belongs to, and then deletes it from the corresponding collection.
