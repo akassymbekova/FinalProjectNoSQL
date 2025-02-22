@@ -78,7 +78,7 @@
                                         <%= product.specifications['Resolution'] || 'No data' %>
                                     </p>
                                     <a href="/product/<%= product._id %>" class="btn btn-primary">View Details</a>
-                                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#buyModal<%= product._id %>"></button>
+                                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#buyModal<%= product._id %>">Buy</button>
                                     
                                     <% if (user && user.isAdmin) { %>
                                         <button type="button" class="btn btn-warning" data-toggle="modal" data-target="#editProductModal<%= product._id %>">Edit</button>
